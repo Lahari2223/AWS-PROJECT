@@ -68,59 +68,9 @@ Select the use case as Lambda
 
 11.Edit the code for producer_kinesis lambda function.
 
-Code for producer 1-
-const AWS=require('aws-sdk')
-AWS.config.update({
-    region:'us-east-1'
-})
-const s3=new AWS.S3()
-const kinesis= new AWS.Kinesis()
-exports.handler = async (event) => {
-console.log(JSON.stringify(event));
-const bucketName = event.Records[0].s3.bucket.name;
-const keyName = event.Records[0].s3.object.key;
-const params = {
-Bucket: bucketName,
-Key: keyName   
-}
-await s3.getObject(params).promise().then(async (data) => {
-const dataString = data.Body.toString();
-const payload = {
-data: dataString
-}
-await sendToKinesis(payload, keyName);
-}, error =>  {
-console.error(error);
-})
-};
-async function sendToKinesis(payload, partitionKey) {
-const params = {
-Data: JSON.stringify(payload),
-PartitionKey: partitionKey,
-StreamName: 'mydatastream'
-}
-await kinesis.putRecord(params).promise().then(response => {
-console.log(response);
-}, error => {
-    console.error(error)
-})
-}
  
 
 12.Edit the code for consumer1_kinesis and consumer2_kinesis lambda functions
-
-Code for Consumer:
-exports.handler = async (event) => {
-console.log(JSON.stringify(event));
-for (const record of event.Records) {
-const data = JSON.parse(Buffer.from(record.kinesis.data, 'base64'));
-//send emails clients, publish the data social media
-console.log('cosumer #2', data);
-}
-};
- 
-
-
 
 
 
@@ -131,13 +81,9 @@ console.log('cosumer #2', data);
  
 
 
-
-
-
 15.Go to monitor tab in producer_kinesis lambda function and click on CloudWatch metrics
  
 
- 
 
 Hence the real-time streaming of the s3 buclet activities are noticed with the log activities of the cloud watch .
 We used serverless services (AWS Kinesis) which is a data streaming service along with S3 and lambda.
